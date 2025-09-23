@@ -34,7 +34,7 @@ if menu == "Users":
     # Update User
     with tabs[1]:
         with st.form("update_user"):
-            user_id = st.text_input("User ID", key="update_user_id")  # 🛠️ Added key
+            user_id = st.text_input("User ID", key="update_user_id")  
             name = st.text_input("New Name (optional)", key="update_user_name")
             email = st.text_input("New Email (optional)", key="update_user_email")
             if st.form_submit_button("Update"):
@@ -44,7 +44,7 @@ if menu == "Users":
     # Delete User
     with tabs[2]:
         with st.form("delete_user"):
-            user_id = st.text_input("User ID", key="delete_user_id")  # 🛠️ Added key
+            user_id = st.text_input("User ID", key="delete_user_id")  
             if st.form_submit_button("Delete"):
                 res = user_service.delete_user(user_id)
                 st.warning(res)
@@ -57,7 +57,7 @@ if menu == "Users":
 
     # Get User by ID
     with tabs[4]:
-        user_id = st.text_input("Enter User ID", key="get_user_by_id")  # 🛠️ Added key
+        user_id = st.text_input("Enter User ID", key="get_user_by_id")  
         if st.button("Fetch User"):
             st.write(user_service.get_user(user_id))
 
@@ -80,7 +80,7 @@ elif menu == "Titles":
     # Update Title
     with tabs[1]:
         with st.form("update_title"):
-            movie_id = st.text_input("Movie/Show ID", key="update_title_id")  # 🛠️ Added key
+            movie_id = st.text_input("Movie/Show ID", key="update_title_id")  
             new_title = st.text_input("New Title (optional)", key="update_title_name")
             new_type = st.text_input("New Type (movie/show/anime, optional)", key="update_title_type")
             if st.form_submit_button("Update"):
@@ -90,7 +90,7 @@ elif menu == "Titles":
     # Delete Title
     with tabs[2]:
         with st.form("delete_title"):
-            movie_id = st.text_input("Movie/Show ID", key="delete_title_id")  # 🛠️ Added key
+            movie_id = st.text_input("Movie/Show ID", key="delete_title_id")  
             if st.form_submit_button("Delete"):
                 res = title_service.delete_title(movie_id)
                 st.warning(res)
@@ -120,8 +120,8 @@ elif menu == "Watchlist":
     # Add to Watchlist
     with tabs[0]:
         with st.form("add_watchlist"):
-            user_id = st.text_input("User ID", key="add_watchlist_user_id")  # 🛠️ Added key
-            movie_id = st.text_input("Movie/Show ID", key="add_watchlist_movie_id")  # 🛠️ Added key
+            user_id = st.text_input("User ID", key="add_watchlist_user_id")  
+            movie_id = st.text_input("Movie/Show ID", key="add_watchlist_movie_id")  
             status = st.selectbox("Status", ["watched", "planning", "dropped"], key="add_watchlist_status")
             rating = st.number_input("Rating (1-10)", min_value=1, max_value=10, step=1, value=5, key="add_watchlist_rating")
             review = st.text_area("Review (optional)", key="add_watchlist_review")
@@ -132,7 +132,7 @@ elif menu == "Watchlist":
     # Update Watchlist
     with tabs[1]:
         with st.form("update_watchlist"):
-            watchlist_id = st.text_input("Watchlist ID", key="update_watchlist_id")  # 🛠️ Added key
+            watchlist_id = st.text_input("Watchlist ID", key="update_watchlist_id")
             status = st.text_input("New Status (optional)", key="update_watchlist_status")
             rating = st.text_input("New Rating (optional)", key="update_watchlist_rating")
             review = st.text_area("New Review (optional)", key="update_watchlist_review")
@@ -148,21 +148,21 @@ elif menu == "Watchlist":
     # Remove from Watchlist
     with tabs[2]:
         with st.form("delete_watchlist"):
-            watchlist_id = st.text_input("Watchlist ID", key="delete_watchlist_id")  # 🛠️ Added key
+            watchlist_id = st.text_input("Watchlist ID", key="delete_watchlist_id")
             if st.form_submit_button("Remove"):
                 res = watchlist_service.remove_from_watchlist(watchlist_id)
                 st.warning(res)
 
     # Get User Watchlist
     with tabs[3]:
-        user_id = st.text_input("User ID", key="get_watchlist_user_id")  # 🛠️ Added key
+        user_id = st.text_input("User ID", key="get_watchlist_user_id")
         if st.button("Show Watchlist"):
             res = watchlist_service.get_user_watchlist(user_id)
             st.table(res)
 
     # Filter Watchlist by Status
     with tabs[4]:
-        user_id = st.text_input("User ID", key="filter_watchlist_user_id")  # 🛠️ Added key
+        user_id = st.text_input("User ID", key="filter_watchlist_user_id")
         status = st.selectbox("Status", ["watched", "planning", "dropped"], key="filter_watchlist_status")
         if st.button("Filter"):
             res = watchlist_service.get_user_watchlist_by_status(user_id, status)
