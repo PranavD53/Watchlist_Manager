@@ -21,12 +21,14 @@ class TitleDAO:
     def search_titles(self, keyword: str):
         return self.supabase.table(self.table).select("*").ilike("title", f"%{keyword}%").execute().data
 
-    def update_title(self, movie_id: str, title: str = None, type_: str = None):
+    def update_title(self, movie_id: str, title: str = None, type_: str = None, genre: str = None):
         update_fields = {}
         if title:
             update_fields["title"] = title
         if type_:
             update_fields["type"] = type_
+        if genre:
+            update_fields["genre"] = genre
         if not update_fields:
             return {"error": "No fields to update"}
         return self.supabase.table(self.table).update(update_fields).eq("movie_id", movie_id).execute().data
@@ -35,11 +37,10 @@ class TitleDAO:
         return self.supabase.table(self.table).delete().eq("movie_id", movie_id).execute().data
     
     def list_genres(self):
-        response = supabase.table(self.table).select("genre").execute()
+        response = self.supabase.table(self.table).select("genre").execute()
         genres = [row["genre"] for row in response.data if row.get("genre")]
-        return list(set(genres))  
+        return list(set(genres)) 
 
-    
     def search_movies(self, query):
         response = supabase.table(self.table).select("*").or_(
             f"title.ilike.%{query}%,genre.ilike.%{query}%"

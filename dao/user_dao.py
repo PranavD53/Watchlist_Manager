@@ -5,10 +5,11 @@ class UserDAO:
         self.supabase = supabase
         self.table = "users"
 
-    def create_user(self, name: str, email: str):
+    def create_user(self, name: str, email: str,password: str):
         return self.supabase.table(self.table).insert({
             "name": name,
-            "email": email
+            "email": email,
+            "password":password
         }).execute().data
 
     def get_user_by_id(self, user_id: str):
@@ -20,12 +21,14 @@ class UserDAO:
     def list_users(self):
         return self.supabase.table(self.table).select("*").execute().data
 
-    def update_user(self, user_id: str, name: str = None, email: str = None):
+    def update_user(self, user_id: str, name: str = None, email: str = None, password: str = None):
         update_fields = {}
         if name:
             update_fields["name"] = name
         if email:
             update_fields["email"] = email
+        if password:
+            update_fields["password"] = password
         if not update_fields:
             return {"error": "No fields to update"}
         return self.supabase.table(self.table).update(update_fields).eq("user_id", user_id).execute().data
