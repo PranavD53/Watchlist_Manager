@@ -5,19 +5,15 @@ from services.user_service import UserService
 from services.title_service import TitleService
 from services.watchlist_service import WatchlistService
 
-# ---- Initialize services ----
 user_service = UserService()
 title_service = TitleService()
 watchlist_service = WatchlistService()
 
-# ---- Session state ----
 if "user" not in st.session_state:
     st.session_state.user = None
 if "show_main_app" not in st.session_state:
     st.session_state.show_main_app = False
 
-
-# ---- Helper ----
 def handle_response(res):
     """Standardized response handling"""
     if isinstance(res, dict) and "error" in res:
@@ -26,11 +22,9 @@ def handle_response(res):
         st.success(res if isinstance(res, str) else "✅ Done!")
 
 
-# ---- Dashboard ----
 def dashboard(show_user_data=True):
     st.header("📊 Dashboard Overview")
 
-    # Fetch data
     users = user_service.list_users()
     total_users = len(users) if users else 0
 
@@ -47,14 +41,12 @@ def dashboard(show_user_data=True):
         planning = len([w for w in watchlist if w.get("status") == "planning"])
         dropped = len([w for w in watchlist if w.get("status") == "dropped"])
 
-    # Metrics
     col1, col2, col3 = st.columns(3)
     col1.metric("👥 Total Users", total_users)
     col2.metric("🎥 Total Titles", total_titles)
     col3.metric("📺 My Watchlist", total_watchlist)
 
     if show_user_data and st.session_state.user:
-        # Watchlist breakdown
         st.subheader("📺 My Watchlist Breakdown")
         c1, c2, c3 = st.columns(3)
         c1.metric("✅ Watched", watched)
@@ -70,17 +62,13 @@ def dashboard(show_user_data=True):
             st.pyplot(fig)
 
 
-# ---- Login/Register Page ----
 def login_page():
     st.markdown("<h1 style='text-align: center;'>🎬 Watchlist Manager</h1>", unsafe_allow_html=True)
 
-    left, right = st.columns([2, 1])  # left = dashboard, right = login/register
-
-    # Left → Dashboard (no user-specific watchlist yet)
+    left, right = st.columns([2, 1])
     with left:
         dashboard(show_user_data=False)
 
-    # Right → Login/Register
     with right:
         st.subheader("🔐 Login / Register")
         choice = st.radio("Choose", ["Login", "Register"])
@@ -113,7 +101,6 @@ def login_page():
                     st.rerun()
 
 
-# ---- Main App ----
 def main_app():
     st.sidebar.title(f"👋 Hello, {st.session_state.user['name']}")
     if st.sidebar.button("Logout"):
@@ -123,11 +110,9 @@ def main_app():
 
     menu = st.sidebar.radio("Menu", ["Dashboard", "My Watchlist", "Titles"])
 
-    # ---------------- Dashboard ----------------
     if menu == "Dashboard":
         dashboard()
 
-    # ---------------- Watchlist ----------------
     elif menu == "My Watchlist":
         st.header("📺 My Watchlist")
         watchlist = watchlist_service.get_user_watchlist(st.session_state.user["user_id"])
@@ -139,7 +124,6 @@ def main_app():
 
         tabs = st.tabs(["➕ Add", "✏️ Update", "❌ Remove"])
 
-        # Add
         with tabs[0]:
             with st.form("add_watchlist"):
                 titles = title_service.list_all_titles()
@@ -156,7 +140,6 @@ def main_app():
                     )
                     handle_response(res)
 
-        # Update
         with tabs[1]:
             if watchlist:
                 options = {
@@ -177,7 +160,6 @@ def main_app():
                         )
                         handle_response(res)
 
-        # Remove
         with tabs[2]:
             if watchlist:
                 options = {
@@ -190,7 +172,6 @@ def main_app():
                         res = watchlist_service.remove_from_watchlist(options[watchlist_id])
                         st.warning(res)
 
-    # ---------------- Titles ----------------
     elif menu == "Titles":
         st.header("🎥 Titles")
 
@@ -212,7 +193,6 @@ def main_app():
 
         tabs = st.tabs(["➕ Add", "✏️ Update", "❌ Delete"])
 
-        # Add
         with tabs[0]:
             with st.form("add_title"):
                 title = st.text_input("Title Name")
@@ -222,7 +202,6 @@ def main_app():
                     res = title_service.add_title(title, t_type, genre or None)
                     handle_response(res)
 
-        # Update
         with tabs[1]:
             if titles:
                 options = {f"{t.get('title', 'Untitled')} (ID: {t.get('movie_id', '?')})": t["movie_id"]
@@ -241,7 +220,7 @@ def main_app():
                         )
                         handle_response(res)
 
-        # Delete
+
         with tabs[2]:
             if titles:
                 options = {f"{t.get('title', 'Untitled')} (ID: {t.get('movie_id', '?')})": t["movie_id"]
@@ -252,8 +231,6 @@ def main_app():
                         res = title_service.delete_title(options[movie_id])
                         st.warning(res)
 
-
-# ---- Run App ----
 if st.session_state.user and st.session_state.show_main_app:
     main_app()
 else:
