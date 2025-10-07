@@ -70,12 +70,47 @@ def dashboard(show_user_data=True, outer=True):
         c3.metric("❌ Dropped", dropped)
 
         if total_watchlist > 0:
+            import matplotlib.colors as mcolors
+
             labels = ["Watched", "Planning", "Dropped"]
             sizes = [watched, planning, dropped]
-            fig, ax = plt.subplots()
-            ax.pie(sizes, labels=labels, autopct="%1.1f%%")
+
+            hex_colors = ["#6a0dad", "#1e3c72", "#8a2be2"]
+            colors = [mcolors.to_rgba(c) for c in hex_colors]
+
+            fig, ax = plt.subplots(figsize=(5,5), facecolor='none')
+            ax.set_facecolor('none')
+
+            for alpha in [0.2, 0.4, 0.6, 0.8, 1.0]:
+                glow_colors = [(r, g, b, alpha) for r, g, b, _ in colors]
+                ax.pie(
+                    sizes,
+                    labels=None,
+                    startangle=90,
+                    colors=glow_colors,
+                    radius=1,
+                    wedgeprops={'linewidth': 0}
+                )
+
+            wedges, texts, autotexts = ax.pie(
+                sizes,
+                labels=labels,
+                autopct="%1.1f%%",
+                startangle=90,
+                colors=hex_colors,
+                wedgeprops={'edgecolor':'black', 'linewidth':2}
+            )
+
+            for t in texts + autotexts:
+                t.set_color('white')
+                t.set_fontsize(12)
+                t.set_fontweight('bold')
+
             ax.axis("equal")
-            st.pyplot(fig)
+            st.pyplot(fig, transparent=True)
+
+
+
 
 def login_page():
     st.markdown("<h1 style='text-align: center;'>🎬 Watchlist Manager</h1>", unsafe_allow_html=True)
