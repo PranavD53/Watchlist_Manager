@@ -1,6 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
+import json, os
 from services.user_service import UserService
 from services.title_service import TitleService
 from services.watchlist_service import WatchlistService
@@ -9,20 +10,36 @@ user_service = UserService()
 title_service = TitleService()
 watchlist_service = WatchlistService()
 
+SESSION_FILE = "session.json"
+
+if os.path.exists(SESSION_FILE) and "user" not in st.session_state:
+    with open(SESSION_FILE, "r") as f:
+        st.session_state.user = json.load(f)
+        st.session_state.show_main_app = True
+
 if "user" not in st.session_state:
     st.session_state.user = None
 if "show_main_app" not in st.session_state:
     st.session_state.show_main_app = False
 
-def handle_response(res):
-    """Standardized response handling"""
+def save_session(user):
+    with open(SESSION_FILE, "w") as f:
+        json.dump(user, f)
+
+def clear_session():
+    if os.path.exists(SESSION_FILE):
+        os.remove(SESSION_FILE)
+    st.session_state.user = None
+    st.session_state.show_main_app = False
+
+def handle_response(res, success_message="✅ Done!"):
     if isinstance(res, dict) and "error" in res:
         st.error(res["error"])
     else:
-        st.success(res if isinstance(res, str) else "✅ Done!")
+        st.success(success_message)
+        st.rerun()
 
-
-def dashboard(show_user_data=True):
+def dashboard(show_user_data=True, outer=True):
     st.header("📊 Dashboard Overview")
 
     users = user_service.list_users()
@@ -31,7 +48,6 @@ def dashboard(show_user_data=True):
     titles = title_service.list_all_titles()
     total_titles = len(titles) if titles else 0
 
-    watchlist = []
     total_watchlist, watched, planning, dropped = 0, 0, 0, 0
 
     if show_user_data and st.session_state.user:
@@ -41,10 +57,10 @@ def dashboard(show_user_data=True):
         planning = len([w for w in watchlist if w.get("status") == "planning"])
         dropped = len([w for w in watchlist if w.get("status") == "dropped"])
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("👥 Total Users", total_users)
-    col2.metric("🎥 Total Titles", total_titles)
-    col3.metric("📺 My Watchlist", total_watchlist)
+    if outer:
+        col1, col2 = st.columns(2)
+        col1.metric("👥 Total Users", total_users)
+        col2.metric("🎥 Total Titles", total_titles)
 
     if show_user_data and st.session_state.user:
         st.subheader("📺 My Watchlist Breakdown")
@@ -61,13 +77,12 @@ def dashboard(show_user_data=True):
             ax.axis("equal")
             st.pyplot(fig)
 
-
 def login_page():
     st.markdown("<h1 style='text-align: center;'>🎬 Watchlist Manager</h1>", unsafe_allow_html=True)
-
     left, right = st.columns([2, 1])
+
     with left:
-        dashboard(show_user_data=False)
+        dashboard(show_user_data=False, outer=True)
 
     with right:
         st.subheader("🔐 Login / Register")
@@ -81,6 +96,7 @@ def login_page():
                 if user:
                     st.session_state.user = user
                     st.session_state.show_main_app = True
+                    save_session(user)
                     st.success(f"Welcome {user['name']}!")
                     st.rerun()
                 else:
@@ -98,20 +114,20 @@ def login_page():
                     st.success("✅ Account created! Logging you in...")
                     st.session_state.user = res
                     st.session_state.show_main_app = True
+                    save_session(res)
                     st.rerun()
 
-
 def main_app():
+    st.sidebar.image("default.png", width=80)
     st.sidebar.title(f"👋 Hello, {st.session_state.user['name']}")
     if st.sidebar.button("Logout"):
-        st.session_state.user = None
-        st.session_state.show_main_app = False
+        clear_session()
         st.rerun()
 
     menu = st.sidebar.radio("Menu", ["Dashboard", "My Watchlist", "Titles"])
 
     if menu == "Dashboard":
-        dashboard()
+        dashboard(outer=False)
 
     elif menu == "My Watchlist":
         st.header("📺 My Watchlist")
@@ -138,7 +154,7 @@ def main_app():
                     res = watchlist_service.add_to_watchlist(
                         st.session_state.user["user_id"], title_options[movie_id], status, rating, review or None
                     )
-                    handle_response(res)
+                    handle_response(res, "✅ Added successfully!")
 
         with tabs[1]:
             if watchlist:
@@ -158,7 +174,7 @@ def main_app():
                             new_rating if new_rating > 0 else None,
                             new_review or None,
                         )
-                        handle_response(res)
+                        handle_response(res, "✅ Updated successfully!")
 
         with tabs[2]:
             if watchlist:
@@ -170,7 +186,7 @@ def main_app():
                     watchlist_id = st.selectbox("Select Entry to Remove", options.keys())
                     if st.form_submit_button("Remove"):
                         res = watchlist_service.remove_from_watchlist(options[watchlist_id])
-                        st.warning(res)
+                        handle_response(res, "❌ Removed successfully!")
 
     elif menu == "Titles":
         st.header("🎥 Titles")
@@ -200,7 +216,7 @@ def main_app():
                 genre = st.text_input("Genre (optional)")
                 if st.form_submit_button("Add"):
                     res = title_service.add_title(title, t_type, genre or None)
-                    handle_response(res)
+                    handle_response(res, "✅ Added successfully!")
 
         with tabs[1]:
             if titles:
@@ -218,8 +234,7 @@ def main_app():
                             new_type or None,
                             new_genre or None,
                         )
-                        handle_response(res)
-
+                        handle_response(res, "✅ Updated successfully!")
 
         with tabs[2]:
             if titles:
@@ -229,7 +244,8 @@ def main_app():
                     movie_id = st.selectbox("Select Title to Delete", options.keys())
                     if st.form_submit_button("Delete"):
                         res = title_service.delete_title(options[movie_id])
-                        st.warning(res)
+                        handle_response(res, "❌ Deleted successfully!")
+
 
 if st.session_state.user and st.session_state.show_main_app:
     main_app()
