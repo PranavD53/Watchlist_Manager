@@ -443,17 +443,24 @@ def login_page():
 
 def main_app():
     with st.sidebar:
-        st.markdown("---")
-        user = st.session_state.user if isinstance(st.session_state.user, dict) else {}
+        user_data = st.session_state.get("user")
+
+        if isinstance(user_data, list) and len(user_data) > 0:
+            user = user_data[0]
+        elif isinstance(user_data, dict):
+            user = user_data
+        else:
+            user = {}
 
         profile_pic = user.get("profile_pic")
         if profile_pic:
-            st.image(profile_pic, width=100)
+            try:
+                st.image(profile_pic, width=100)
+            except Exception:
+                st.markdown("<div style='font-size:50px; text-align:center;'>👤</div>", unsafe_allow_html=True)
         else:
-            st.markdown(
-                "<div style='font-size:50px; text-align:center;'>👤</div>",
-                unsafe_allow_html=True
-            )
+            st.markdown("<div style='font-size:50px; text-align:center;'>👤</div>", unsafe_allow_html=True)
+
 
         
         st.markdown(
