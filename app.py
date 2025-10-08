@@ -444,8 +444,17 @@ def login_page():
 def main_app():
     with st.sidebar:
         st.markdown("---")
-        user = st.session_state.user or {}
-        st.markdown("<div style='font-size:50px;'>👤</div>", unsafe_allow_html=True)
+        user = st.session_state.user if isinstance(st.session_state.user, dict) else {}
+
+        profile_pic = user.get("profile_pic")
+        if profile_pic:
+            st.image(profile_pic, width=100)
+        else:
+            st.markdown(
+                "<div style='font-size:50px; text-align:center;'>👤</div>",
+                unsafe_allow_html=True
+            )
+
         
         st.markdown(
         f"<div class='sidebar-title'>👋 {user.get('name', 'User')}</div>",
