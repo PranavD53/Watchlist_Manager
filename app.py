@@ -286,7 +286,23 @@ def display_dashboard(show_user_data=True,outer=True):
             display_stat_card("Total Titles", total_titles, "🎥")
     
     if show_user_data and st.session_state.user:
-        watchlist = watchlist_service.get_user_watchlist(st.session_state.user["user_id"])
+        
+        user_data = st.session_state.get("user")
+
+        if isinstance(user_data, list) and len(user_data) > 0:
+            user = user_data[0]
+        elif isinstance(user_data, dict):
+            user = user_data
+        else:
+            user = {}
+
+        user_id = user.get("user_id")
+
+        if user_id:
+            watchlist = watchlist_service.get_user_watchlist(user_id)
+        else:
+            watchlist = []
+
         total_watchlist = len(watchlist) if watchlist else 0
         
         watched = len([w for w in watchlist if w.get("status") == "watched"])
@@ -431,6 +447,7 @@ def login_page():
                             st.error("❌ Passwords don't match.")
                         else:
                             res = user_service.register_user(name, email, password)
+
                             if isinstance(res, dict) and "error" in res:
                                 st.error(f"❌ {res['error']}")
                             else:
@@ -489,7 +506,22 @@ def main_app():
     elif menu == "📋 My Watchlist":
         render_page_header("📋 My Watchlist", "Manage your collection of watched and planned titles")
         
-        watchlist = watchlist_service.get_user_watchlist(st.session_state.user["user_id"])
+        user_data = st.session_state.get("user")
+
+        if isinstance(user_data, list) and len(user_data) > 0:
+            user = user_data[0]
+        elif isinstance(user_data, dict):
+            user = user_data
+        else:
+            user = {}
+
+        user_id = user.get("user_id")
+
+        if user_id:
+            watchlist = watchlist_service.get_user_watchlist(user_id)
+        else:
+            watchlist = []
+
         
         if watchlist:
             st.markdown("<h3 class='section-title'>Your Entries</h3>", unsafe_allow_html=True)
