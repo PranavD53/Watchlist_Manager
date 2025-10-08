@@ -2,7 +2,6 @@ from services.user_service import UserService
 from services.title_service import TitleService
 from services.watchlist_service import WatchlistService
 
-# Initialize services
 user_service = UserService()
 title_service = TitleService()
 watchlist_service = WatchlistService()
@@ -10,33 +9,29 @@ watchlist_service = WatchlistService()
 
 def menu():
     while True:
-        print("\n🎬 Watchlist Manager - Main Menu")
+        print("\nWatchlist Manager - Main Menu")
         print("---- USER MANAGEMENT ----")
         print("1. Add User")
         print("2. List Users")
         print("3. Get User by ID")
         print("4. Update User")
         print("5. Delete User")
-
         print("\n---- TITLE MANAGEMENT ----")
         print("6. Add Title (Movie/Show/Anime)")
         print("7. List All Titles")
         print("8. Search Titles")
         print("9. Update Title")
         print("10. Delete Title")
-
         print("\n---- WATCHLIST MANAGEMENT ----")
         print("11. Add to Watchlist")
         print("12. Get User Watchlist")
         print("13. Get User Watchlist by Status")
         print("14. Update Watchlist Entry")
         print("15. Remove from Watchlist")
-
         print("\n0. Exit")
 
         choice = input("\nEnter your choice: ")
 
-        # ---- USER COMMANDS ----
         if choice == "1":
             name = input("Enter user name: ")
             email = input("Enter user email: ")
@@ -59,7 +54,6 @@ def menu():
             user_id = input("Enter User ID: ")
             print(user_service.delete_user(user_id))
 
-        # ---- TITLE COMMANDS ----
         elif choice == "6":
             title = input("Enter title name: ")
             t_type = input("Enter type (movie/show/anime): ")
@@ -83,7 +77,6 @@ def menu():
             movie_id = input("Enter Movie/Show ID: ")
             print(title_service.delete_title(movie_id))
 
-        # ---- WATCHLIST COMMANDS ----
         elif choice == "11":
             user_id = input("Enter User ID: ")
             movie_id = input("Enter Movie/Show ID: ")
@@ -112,7 +105,6 @@ def menu():
             watchlist_id = input("Enter Watchlist ID: ")
             print(watchlist_service.remove_from_watchlist(watchlist_id))
 
-        # ---- EXIT ----
         elif choice == "0":
             print("👋 Exiting Watchlist Manager. Goodbye!")
             break
