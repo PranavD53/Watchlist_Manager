@@ -445,10 +445,7 @@ def main_app():
     with st.sidebar:
         st.markdown("---")
         user = st.session_state.user or {}
-        if user.get("profile_pic"):
-            st.image(user["profile_pic"], width=100)
-        else:
-            st.markdown("<div style='font-size:50px;'>👤</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:50px;'>👤</div>", unsafe_allow_html=True)
         
         st.markdown(
         f"<div class='sidebar-title'>👋 {user.get('name', 'User')}</div>",
