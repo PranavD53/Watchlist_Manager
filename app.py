@@ -7,14 +7,12 @@ from services.user_service import UserService
 from services.title_service import TitleService
 from services.watchlist_service import WatchlistService
 
-# Initialize services
 user_service = UserService()
 title_service = TitleService()
 watchlist_service = WatchlistService()
 
 SESSION_FILE = "session.json"
 
-# Page config
 st.set_page_config(
     page_title="Watchlist Manager",
     page_icon="🎬",
@@ -22,7 +20,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for modern design
 st.markdown("""
     <style>
         * {
@@ -152,7 +149,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Session management
 if os.path.exists(SESSION_FILE) and "user" not in st.session_state:
     with open(SESSION_FILE, "r") as f:
         st.session_state.user = json.load(f)
@@ -214,7 +210,7 @@ def display_dashboard(show_user_data=True, outer=True):
         with stat_col3:
             st.metric("❌ Dropped", dropped)
         
-        # Pie chart
+
         if total_watchlist > 0:
             fig, ax = plt.subplots(figsize=(6, 5), facecolor='none')
             ax.set_facecolor('none')
@@ -309,7 +305,6 @@ def login_page():
                         st.warning("⚠️ Please fill in all fields.")
 
 def main_app():
-    # Sidebar
     with st.sidebar:
         st.markdown("---")
         if st.session_state.user.get("default.png"):
@@ -332,7 +327,6 @@ def main_app():
             clear_session()
             st.rerun()
     
-    # Main content
     if menu == "📊 Dashboard":
         st.markdown("<div class='header-container'><h2>📊 Dashboard</h2></div>", unsafe_allow_html=True)
         display_dashboard(outer=False)
@@ -525,7 +519,6 @@ def main_app():
             else:
                 st.info("📭 No titles to delete.")
 
-# Route to appropriate page
 if st.session_state.user and st.session_state.show_main_app:
     main_app()
 else:
